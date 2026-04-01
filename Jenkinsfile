@@ -6,13 +6,13 @@ pipeline {
 
         stage('Stop Containers') {
             steps {
-                sh 'docker compose down || true'
+                bat 'docker compose down || true'
             }
         }
 
         stage('Build & Run') {
             steps {
-                sh 'docker compose up -d --build'
+                bat 'docker compose up -d --build'
             }
         }
 
@@ -22,4 +22,5 @@ pipeline {
             }
         }
     }
+
 }
