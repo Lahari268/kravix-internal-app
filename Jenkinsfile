@@ -18,7 +18,7 @@ pipeline {
 
         stage('Check Running') {
             steps {
-                sh 'docker ps'
+                bat 'docker ps'
             }
         }
     }
