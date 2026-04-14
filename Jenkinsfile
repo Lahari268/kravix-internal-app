@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                git 'https://github.com/Lahari628/kravix-internal-app.git'
+                git 'https://github.com/Lahari268/kravix-internal-app.git'
             }
     }
     stage('Build Image') {
