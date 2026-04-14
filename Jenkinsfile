@@ -11,7 +11,7 @@ pipeline {
 
         stage('Clone Code') {
             steps {
-                git 'https://github.com/Lahari268/kravix-internal-app/tree/master.git'
+                git 'https://github.com/Lahari268/kravix-internal-app.git'
             }
         }
 
