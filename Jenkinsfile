@@ -17,13 +17,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t laharikalva-my_app:latest .'
+                sh 'docker build -t laharikalva/laharikalva-my_app:latest .'
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                sh 'docker push laharikalva-my_app:latest'
+                sh 'docker push laharikalva/laharikalva-my_app:latestt'
             }
         }
 
