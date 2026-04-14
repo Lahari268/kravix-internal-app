@@ -23,7 +23,7 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                sh 'docker push laharikalva/laharikalva-my_app:latestt'
+                sh 'docker push laharikalva/laharikalva-my_app:latest'
             }
         }
 
