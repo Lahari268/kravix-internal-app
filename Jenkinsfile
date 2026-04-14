@@ -1,22 +1,43 @@
 pipeline {
     agent any
+
+    environment {
+        IMAGE_NAME = "laharikalva-my_app"
+        EC2_USER = "ubuntu"
+        EC2_IP = "13.61.13.243"
+    }
+
     stages {
+
+        stage('Clone Code') {
+            steps {
+                git 'https://github.com/Lahari268/kravix-internal-app/tree/master.git'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t myapp .'
+                sh 'docker build -t laharikalva-my_app:latest .'
             }
         }
-        stage('Stop Old Container') {
+
+        stage('Push to DockerHub') {
             steps {
-                sh 'docker stop my-running-app || true'
-                sh 'docker rm my-running-app || true'
+                sh 'docker push laharikalva-my_app:latest'
             }
         }
-        stage('Run Container') {
+
+        stage('Deploy to EC2') {
             steps {
-                sh 'docker run -d -p 3000:3000 --name my-running-app myapp'
+                sh '''
+                ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP << EOF
+                docker pull $IMAGE_NAME:latest
+                docker stop myapp || true
+                docker rm myapp || true
+                docker run -d -p 80:3000 --name myapp $IMAGE_NAME:latest
+                EOF
+                '''
             }
         }
     }
 }
-
