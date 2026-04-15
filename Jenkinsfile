@@ -27,7 +27,7 @@ pipeline {
         stage('Deploy to Dev') {
             steps {
                 sh '''
-                ssh ec2-user@13.61.26.69 << EOF
+                ssh -o StrictHostKeyChecking=no ec2-user@13.61.26.69 << EOF
                 docker pull $IMAGE_NAME:$BUILD_NUMBER
                 docker run -d -p 3001:3000 --name devapp $IMAGE_NAME:$BUILD_NUMBER
 EOF
