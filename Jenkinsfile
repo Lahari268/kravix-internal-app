@@ -3,47 +3,69 @@ pipeline {
 
     environment {
         IMAGE_NAME = "laharikalva/my_app"
-        EC2_IP = "13.61.13.243"
-        EC2_USER = "ubuntu"
     }
 
     stages {
 
-        stage('Clone') {
-            steps {
-                git 'https://github.com/Lahari268/kravix-internal-app.git'
-            }
-        }
-
         stage('Build Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
             }
         }
 
-        stage('Push to DockerHub') {
+        stage('Push Image') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+            sh '''
+            docker login -u $USER -p $PASS
+            docker push $IMAGE_NAME:$BUILD_NUMBER
+            '''
+        }
+    }
+}
+
+        stage('Deploy to Dev') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh '''
-                    echo "$PASS" | docker login -u "$USER" --password-stdin
-                    docker push $IMAGE_NAME:latest
-                    '''
-                }
+                sh '''
+                ssh ec2-user@13.61.26.69 << EOF
+                docker pull $IMAGE_NAME:$BUILD_NUMBER
+                docker run -d -p 3001:3000 --name devapp $IMAGE_NAME:$BUILD_NUMBER
+EOF
+                '''
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Approval for QA') {
             steps {
-                sshagent(['ec2-ssh-key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@$13.61.13.243 "
-                    docker pull $IMAGE_NAME:latest &&
-                    docker stop myapp || true &&
-                    docker rm myapp || true &&
-                    docker run -d -p 80:3000 --name myapp $IMAGE_NAME:latest
-                    "
-                    '''
-                }
+                input message: "Deploy to QA?"
+            }
+        }
+
+        stage('Deploy to QA') {
+            steps {
+                sh '''
+                ssh ec2-user@13.60.64.164 << EOF
+                docker pull $IMAGE_NAME:$BUILD_NUMBER
+                docker run -d -p 3002:3000 --name qaapp $IMAGE_NAME:$BUILD_NUMBER
+EOF
+                '''
+            }
+        }
+
+        stage('Approval for Prod') {
+            steps {
+                input message: "Deploy to Production?"
+            }
+        }
+
+        stage('Deploy to Prod') {
+            steps {
+                sh '''
+                ssh ec2-user@13.60.82.120 << EOF
+                docker pull $IMAGE_NAME:$BUILD_NUMBER
+                docker run -d -p 80:3000 --restart always --name prodapp $IMAGE_NAME:$BUILD_NUMBER
+EOF
+                '''
             }
         }
     }
