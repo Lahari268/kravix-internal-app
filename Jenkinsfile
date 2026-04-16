@@ -76,15 +76,22 @@ pipeline {
             }
         }
 
-        stage('Deploy to Prod') {
-            steps {
-                sh '''
-                ssh ec2-user@13.60.82.120 << EOF
-                docker pull $IMAGE_NAME:$BUILD_NUMBER
-                docker run -d -p 80:3000 --restart always --name prodapp $IMAGE_NAME:$BUILD_NUMBER
-EOF
-                '''
-            }
+       stage('Deploy to Prod') {
+    steps {
+        // Use the same credential ID you used for Dev/QA
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-dev-key', keyFileVariable: 'SSH_KEY')]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.60.82.120 "
+                    docker stop my-app-prod || true
+                    docker rm my-app-prod || true
+                    
+                    # Use the build number variable here!
+                    docker pull laharikalva/my_app:${env.BUILD_NUMBER}
+                    docker run -d --name my-app-prod -p 3000:3000 laharikalva/my_app:${env.BUILD_NUMBER}
+                "
+            """
         }
     }
+}
+
 }
