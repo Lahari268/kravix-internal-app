@@ -25,15 +25,27 @@ pipeline {
 }
 
         stage('Deploy to Dev') {
-            steps {
-                sh '''
-                ssh -o StrictHostKeyChecking=no ec2-user@13.61.26.69 << EOF
-                docker pull $IMAGE_NAME:$BUILD_NUMBER
-                docker run -d -p 3001:3000 --name devapp $IMAGE_NAME:$BUILD_NUMBER
-EOF
-                '''
-            }
+    steps {
+        // Use the ID you created in Jenkins (e.g., 'ec2-dev-key')
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-dev-key', keyFileVariable: 'SSH_KEY')]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.61.26.69 '
+                    # Stop and remove the old container if it exists
+                    docker stop my-app || true
+                    docker rm my-app || true
+                    
+                    # Pull the latest image
+                    docker pull laharikalva/my_app:31
+                    
+                    # Run the new container
+                    docker run -d --name my-app -p 3000:3000 laharikalva/my_app:31
+                '
+            """
         }
+    }
+}
+
+
 
         stage('Approval for QA') {
             steps {
