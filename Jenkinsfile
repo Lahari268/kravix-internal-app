@@ -9,7 +9,7 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
+                sh 'docker build -t laharikalva/my_app:$BUILD_NUMBER .'
             }
         }
 
@@ -18,7 +18,7 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
             sh '''
             docker login -u $USER -p $PASS
-            docker push $IMAGE_NAME:$BUILD_NUMBER
+            docker push laharikalva/my_app:$BUILD_NUMBER
             '''
         }
     }
