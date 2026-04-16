@@ -38,7 +38,7 @@ pipeline {
                     docker pull laharikalva/my_app:31
                     
                     # Run the new container
-                    docker run -d --name my-app -p 3000:3000 laharikalva/my_app:31
+                    docker run -d --name my-app -p 80:3000 laharikalva/my_app:31
                 '
             """
         }
@@ -62,7 +62,7 @@ pipeline {
                     docker stop my-app-qa || true
                     docker rm my-app-qa || true
                     docker pull laharikalva/my_app:32
-                    docker run -d --name my-app-qa -p 3000:3000 laharikalva/my_app:32
+                    docker run -d --name my-app-qa -p 80:3000 laharikalva/my_app:32
                 "
             """
         }
@@ -87,7 +87,7 @@ pipeline {
                     
                     # Use the build number variable here!
                     docker pull laharikalva/my_app:${env.BUILD_NUMBER}
-                    docker run -d --name my-app-prod -p 3000:3000 laharikalva/my_app:${env.BUILD_NUMBER}
+                    docker run -d --name my-app-prod -p 80:3000 laharikalva/my_app:${env.BUILD_NUMBER}
                 "
             """
         }
