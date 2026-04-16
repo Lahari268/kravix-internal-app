@@ -24,26 +24,26 @@ pipeline {
     }
 }
 
-        stage('Deploy to Dev') {
+        sstage('Deploy to Dev') {
     steps {
-        // Use the ID you created in Jenkins (e.g., 'ec2-dev-key')
-        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-dev-key', keyFileVariable: 'SSH_KEY')]) {
+        withCredentials([sshUserPrivateKey(credentialsId: 'dev-server-key', keyFileVariable: 'SSH_KEY')]) {
             sh """
-                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.61.26.69 '
-                    # Stop and remove the old container if it exists
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.61.26.69 "
+                    # Stop/Remove old container
                     docker stop my-app || true
                     docker rm my-app || true
                     
-                    # Pull the latest image
-                    docker pull laharikalva/my_app:31
+                    # Pull the SPECIFIC version we just built
+                    docker pull laharikalva/my_app:${env.BUILD_NUMBER}
                     
-                    # Run the new container
-                    docker run -d --name my-app -p 80:3000 laharikalva/my_app:31
-                '
+                    # Run the NEW version
+                    docker run -d --name my-app -p 3000:3000 laharikalva/my_app:${env.BUILD_NUMBER}
+                "
             """
         }
     }
 }
+
 
 
 
@@ -62,7 +62,7 @@ pipeline {
                     docker stop my-app-qa || true
                     docker rm my-app-qa || true
                     docker pull laharikalva/my_app:32
-                    docker run -d --name my-app-qa -p 80:3000 laharikalva/my_app:32
+                    docker run -d --name my-app-qa -p 3000:3000 laharikalva/my_app:32
                 "
             """
         }
@@ -87,7 +87,7 @@ pipeline {
                     
                     # Use the build number variable here!
                     docker pull laharikalva/my_app:${env.BUILD_NUMBER}
-                    docker run -d --name my-app-prod -p 80:3000 laharikalva/my_app:${env.BUILD_NUMBER}
+                    docker run -d --name my-app-prod -p 3000:3000 laharikalva/my_app:${env.BUILD_NUMBER}
                 "
             """
         }
