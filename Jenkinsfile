@@ -54,15 +54,21 @@ pipeline {
         }
 
         stage('Deploy to QA') {
-            steps {
-                sh '''
-                ssh ec2-user@13.60.64.164 << EOF
-                docker pull $IMAGE_NAME:$BUILD_NUMBER
-                docker run -d -p 3002:3000 --name qaapp $IMAGE_NAME:$BUILD_NUMBER
-EOF
-                '''
-            }
+    steps {
+        // Use the same credential ID if it's the same key, or create a new one for QA
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-dev-key', keyFileVariable: 'SSH_KEY')]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.60.64.164 "
+                    docker stop my-app-qa || true
+                    docker rm my-app-qa || true
+                    docker pull laharikalva/my_app:32
+                    docker run -d --name my-app-qa -p 3000:3000 laharikalva/my_app:32
+                "
+            """
         }
+    }
+}
+
 
         stage('Approval for Prod') {
             steps {
