@@ -24,7 +24,7 @@ pipeline {
     }
 }
 
-        sstage('Deploy to Dev') {
+       stage('Deploy to Dev') {
     steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'dev-server-key', keyFileVariable: 'SSH_KEY')]) {
             sh """
@@ -43,6 +43,7 @@ pipeline {
         }
     }
 }
+
 
 
 
