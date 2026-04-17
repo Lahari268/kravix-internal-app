@@ -26,7 +26,7 @@ pipeline {
 
        stage('Deploy to Dev') {
     steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'dev-server-key', keyFileVariable: 'SSH_KEY')]) {
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-dev-key', keyFileVariable: 'SSH_KEY')]) {
             sh """
                 ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.61.26.69 "
                     # Stop/Remove old container
