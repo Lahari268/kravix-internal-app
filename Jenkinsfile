@@ -62,8 +62,9 @@ pipeline {
                 ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@13.60.64.164 "
                     docker stop my-app-qa || true
                     docker rm my-app-qa || true
-                    docker pull laharikalva/my_app:32
-                    docker run -d --name my-app-qa -p 3000:3000 laharikalva/my_app:32
+                    docker pull laharikalva/my_app:${env.BUILD_NUMBER}
+                    docker run -d --name my-app-qa -p 3000:3000 laharikalva/my_app:${env.BUILD_NUMBER}
+
                 "
             """
         }
