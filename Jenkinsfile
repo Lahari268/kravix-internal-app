@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "laharikalva/my_app"
+        DB_PASS = credentials('db-password-id') 
     }
 
     stages {
@@ -33,12 +33,9 @@ pipeline {
                     docker stop my-app || true
                     docker rm my-app || true
                     
-                    # Pull the SPECIFIC version we just built
-                    docker pull laharikalva/my_app:${env.BUILD_NUMBER}
-                    
-                    # Run the NEW version
-                    docker run -d --name my-app -p 3001:3000 laharikalva/my_app:${env.BUILD_NUMBER}
-                "
+                   # Use -e to pass the secret variable into the Docker container
+                            docker run -d --name my-app -e DB_PASS=${DB_PASS} -p 3001:3000 laharikalva/my_app:${env.BUILD_NUMBER}
+                        "
             """
         }
     }
