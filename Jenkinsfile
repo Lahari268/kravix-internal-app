@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DB_PASS = credentials('db-password-id') 
+        DB_PASS = credentials('3000') 
     }
 
     stages {
